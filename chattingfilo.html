@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Chatting Filo</title>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: white; display: flex; flex-direction: column; height: 100vh; margin: 0; }
+        #chatbox { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 12px 18px; border-radius: 15px; max-width: 80%; line-height: 1.4; }
+        .user { align-self: flex-end; background: #007bff; }
+        .filo { align-self: flex-start; background: #333; border: 1px solid #444; }
+        .input-area { padding: 20px; display: flex; gap: 10px; background: #1e1e1e; border-top: 1px solid #333; }
+        input { flex: 1; padding: 12px; border-radius: 25px; border: 1px solid #444; background: #2d2d2d; color: white; outline: none; }
+        button { background: #00c853; color: white; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div id="chatbox">
+        <div class="msg filo">Halo! Aku Filo. Sekarang aku online. Mau tanya apa?</div>
+    </div>
+    <div class="input-area">
+        <input type="text" id="inputPesan" placeholder="Ketik pesan..." onkeypress="if(event.key === 'Enter') kirim()">
+        <button onclick="kirim()">KIRIM</button>
+    </div>
+
+    <script type="importmap">
+        { "imports": { "@google/generative-ai": "https://esm.run/@google/generative-ai" } }
+    </script>
+    <script type="module">
+        import { GoogleGenerativeAI } from "@google/generative-ai";
+        
+        // GANTI DENGAN API KEY ASLI KAMU
+        const API_KEY = "AIzaSyB69IEelCGAoY33utPx8x_BDHuxIGuhBfQ"; 
+        
+        const genAI = new GoogleGenerativeAI(API_KEY);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+        window.kirim = async () => {
+            const input = document.getElementById('inputPesan');
+            const chatbox = document.getElementById('chatbox');
+            const pesan = input.value.trim();
+            if(!pesan) return;
+
+            chatbox.innerHTML += `<div class="msg user">${pesan}</div>`;
+            input.value = "";
+            chatbox.scrollTop = chatbox.scrollHeight;
+
+            try {
+                const result = await model.generateContent(pesan);
+                const response = await result.response;
+                chatbox.innerHTML += `<div class="msg filo">${response.text()}</div>`;
+            } catch (e) {
+                chatbox.innerHTML += `<div class="msg filo">Maaf, periksa API Key kamu atau koneksi internet.</div>`;
+            }
+            chatbox.scrollTop = chatbox.scrollHeight;
+        };
+    </script>
+</body>
+</html>
